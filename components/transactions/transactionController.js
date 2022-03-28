@@ -37,7 +37,7 @@ export const postSendTransaction = async (req, res, next) => {
 
         // Store initial balances and transactions.
         senderInitialBalance = sender.balance;
-        receiverInitialBalance = receiver.baance;
+        receiverInitialBalance = receiver.balance;
         txnsSent = sender.transactions.sent.length;
         txnsReceived = receiver.transactions.received.length;
 
@@ -88,8 +88,8 @@ export const postSendTransaction = async (req, res, next) => {
         if (sender.transactions.sent.length > txnsSent)
             await sender.transactions.sent.pop();
         
-        if (sender.transactions.sent.length > txnsSent)
-            await sender.transactions.sent.pop();
+        if (receiver.transactions.received.length > txnsReceived)
+            await receiver.transactions.received.pop();
         
         // Update database.
         sender.save();
