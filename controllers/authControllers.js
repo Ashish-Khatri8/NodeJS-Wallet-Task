@@ -1,8 +1,8 @@
 import bcrypt from "bcryptjs";
 
-import User from "../users/userModel.js";
-import { createToken } from "./jwtHandler.js";
-import sendMail from "../Services/sendMail.js";
+import User from "../models/userModel.js";
+import { createToken } from "../services/jwtHandler.js";
+import sendMail from "../helpers/sendMail.js";
 
 export const postSignUp = async (req, res, next) => {
     // Get user input from req body.

@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { getUserDetails, getUserBalance, getUserTransactions } from "./userController.js";
-import { isAuth } from "../auth/jwtHandler.js";
+import { getUserDetails, getUserBalance, getUserTransactions } from "../controllers/userControllers.js";
+import { isAuth } from "../services/jwtHandler.js";
 
 const router = Router();
 

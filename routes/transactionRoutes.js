@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { postSendTransaction } from "./transactionController.js";
-import { isAuth } from "../auth/jwtHandler.js";
+import { postSendTransaction } from "../controllers/transactionControllers.js";
+import { isAuth } from "../services/jwtHandler.js";
 
 const router = Router();
 

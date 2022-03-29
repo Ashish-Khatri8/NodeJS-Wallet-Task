@@ -1,4 +1,4 @@
-import User from "./userModel.js";
+import User from "../models/userModel.js";
 
 export const findUserHelper = async (userId) => {
     try {

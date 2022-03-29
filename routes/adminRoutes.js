@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { isAuth } from "../auth/jwtHandler.js";
-import { getAllTransactions, getTransactionDetails, getVerificationOTP, postVerificationOTP } from "./adminController.js";
+import { isAuth } from "../services/jwtHandler.js";
+import { getAllTransactions, getTransactionDetails, getVerificationOTP, postVerificationOTP } from "../controllers/adminControllers.js";
 
 const router = Router();
 

@@ -1,7 +1,7 @@
 import {Router} from "express";
 
-import { postSignUp, postLogin, postLogout } from "./authController.js";
-import { isAuth } from "./jwtHandler.js";
+import { postSignUp, postLogin, postLogout } from "../controllers/authControllers.js";
+import { isAuth } from "../services/jwtHandler.js";
 
 const router = Router();
 

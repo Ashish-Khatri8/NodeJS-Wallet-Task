@@ -1,6 +1,6 @@
-import Transaction from "./transactionModel.js";
-import User from "../users/userModel.js";
-import sendMail from "../Services/sendMail.js";
+import Transaction from "../models/transactionModel.js";
+import User from "../models/userModel.js";
+import sendMail from "../helpers/sendMail.js";
 
 
 export const postSendTransaction = async (req, res, next) => {

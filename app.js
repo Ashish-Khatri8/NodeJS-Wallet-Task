@@ -1,10 +1,9 @@
 import express from "express";
 import bodyParser from "body-parser"; 
-import mongoose from "mongoose";
-import userRoutes from "./components/users/userRoutes.js";
-import adminRoutes from "./components/admin/adminRoutes.js";
-import authRoutes from "./components/auth/authRoutes.js";
-import transactionRoutes from "./components/transactions/transactionRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
+import transactionRoutes from "./routes/transactionRoutes.js";
 
 const app = express();
 app.use(bodyParser.json());

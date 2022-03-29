@@ -1,7 +1,7 @@
-import Transaction from "../transactions/transactionModel.js";
-import User from "../users/userModel.js";
-import sendMail from "../Services/sendMail.js";
-import otpHelper from "../Services/otpHelper.js";
+import Transaction from "../models/transactionModel.js";
+import User from "../models/userModel.js";
+import sendMail from "../helpers/sendMail.js";
+import otpHelper from "../helpers/otpHelper.js";
 
 
 export const getVerificationOTP = async (req, res, next) => {
