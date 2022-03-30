@@ -1,41 +1,17 @@
-import User from "../models/userModel.js";
-
-export const findUserHelper = async (userId) => {
-    try {
-        const user = await User.findOne({_id: userId});
-        if (user) {
-            return user;
-        } else {
-            return res.status(400).json({
-                "status": "failure",
-                "message": "No user found!",
-            });
-        }
-    } catch(error) {
-        next(error);
-    }
-};
+import findUser from "../services/findUser.js";
+import successResponse from "../helpers/successResponse.js";
 
 export const getUserDetails = async (req, res, next) => {
-    const user = await findUserHelper(req.userId);
-    res.status(200).json({
-        "message": "success",
-        "userDetails": user,
-    });
+    const user = await findUser({_id: req.userId});
+    successResponse(res, 200, "User details found.", user);
 };
 
 export const getUserBalance = async (req, res, next) => {
-    const user = await findUserHelper(req.userId);
-    res.status(200).json({
-        "status": "success",
-        "balance": user.balance,
-    });
+    const user = await findUser({_id: req.userId});
+    successResponse(res, 200, "User balance found.", user.balance);
 };
 
 export const getUserTransactions = async (req, res, next) => {
-    const user = await findUserHelper(req.userId);
-    res.status(200).json({
-        "status": "success",
-        "transactions": user.transactions,
-    });
+    const user = await findUser({_id: req.userId});
+    successResponse(res, 200, "User transactions found.", user.transactions);
 };

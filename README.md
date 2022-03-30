@@ -6,6 +6,14 @@
 - Set values of environment variables in .env file.
 - $npm start (to start/ run server)
 
+### Also create a .env file with these details: 
+- MongoURL="Your MongoDB Cluster URL"
+- PORT=3000
+- JwtSecretKey="secret key for jwt token creation and verification"
+- SendGridApiKey="Your SendGrid API Key"
+- MailSender="'SenderName' <SendGrid Verified Sender Email>"
+
+
 ## Routes: 
 
 - Pass Authorization header value as: "Bearer JwtToken"

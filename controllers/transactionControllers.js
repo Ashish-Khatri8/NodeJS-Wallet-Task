@@ -1,100 +1,61 @@
-import Transaction from "../models/transactionModel.js";
-import User from "../models/userModel.js";
-import sendMail from "../helpers/sendMail.js";
+import findUser from "../services/findUser.js";
+import updateUser from "../services/updateUser.js";
+import createTransaction from "../services/createTransaction.js";
+import revertTransaction from "../services/revertTransaction.js";
+import sendTxnSuccessMails from "../services/sendTxnConfirmationMails.js";
+import sendTxnFailureMail from "../services/sendTxnFailureMail.js";
+
+import { storePreTxnStatus } from "../helpers/transactionHelper.js";
+import successResponse from "../helpers/successResponse.js";
+import failureResponse from "../helpers/failureResponse.js";
 
 
 export const postSendTransaction = async (req, res, next) => {
-    let senderInitialBalance, receiverInitialBalance, txnsSent, txnsReceived;
-    let sender, receiver, transferAmount, txnCreated; 
+    let sender, receiver, transferAmount, txnCreated;
     try {
-        sender = await User.findOne({_id: req.userId});
-        receiver = await User.findOne({email: req.body.receiverEmail});
+        sender = await findUser({_id: req.userId});
+        receiver = await findUser({email: req.body.receiverEmail});
         transferAmount = req.body.transferAmount;
         
-        // Check if valid reciver is given.
+        // Check if valid receiver is given.
         if (!receiver || receiver._id === sender._id) {
-            return res.status(400).json({
-                "status": "failure",
-                "message": "Enter a valid reciver email!",
-            });
+            return failureResponse(res, 400, "Enter a valid receiver email!");
         }
         // Check if sender has sufficient balance.
         if (transferAmount > sender.balance) {
-            return res.status(400).json({
-                "status": "failure",
-                "message": "Not Enough Balance!",
-            });
+            return failureResponse(res, 400, "Not enough balance!");
         }
     
         // Receiver exists and sender has sufficient balance.
-        const txn = new Transaction({
-            sender: sender._id,
-            receiver: receiver._id,
-            amount: transferAmount,
-            time: Date.now(),
-        });
-        txnCreated = await txn.save();
+       txnCreated = await createTransaction(sender._id, receiver._id, transferAmount);
 
         // Store initial balances and transactions.
-        senderInitialBalance = sender.balance;
-        receiverInitialBalance = receiver.balance;
-        txnsSent = sender.transactions.sent.length;
-        txnsReceived = receiver.transactions.received.length;
-
+        storePreTxnStatus(
+            sender.balance, 
+            receiver.balance, 
+            sender.transactions.sent.length,
+            receiver.transactions.received.length,
+        );
+      
         // Update balances.
-        sender.balance -= transferAmount;
-        receiver.balance += transferAmount;
+        await updateUser(sender, "balance", sender.balance - transferAmount);
+        await updateUser(receiver, "balance", receiver.balance + transferAmount);
         
-        // Update database.
-        await sender.transactions.sent.push(txnCreated._id);
-        await sender.save();
-        await receiver.transactions.received.push(txnCreated._id);
-        await receiver.save();
+        // Update sender and receiver transactions.
+        await updateUser(sender, ["transactions", "sent"], txnCreated._id);
+        await updateUser(receiver, ["transactions", "received"], txnCreated._id);
 
-        // Send mails to both sender and receiver.
-        sendMail(
-            sender.email, 
-            sender.name, 
-            "txnSentSuccess",
-            `You sent ${transferAmount} to ${receiver.name} - (${receiver.email}).
-             TransactionId: ${txnCreated._id}
-            `, 
-        );
-        sendMail(
-            receiver.email, 
-            receiver.name, 
-            "txnReceived",
-            `You received ${transferAmount} from ${sender.name} - (${sender.email})
-             TransactionId: ${txnCreated._id}
-            `, 
+        // Send txn success mails to both sender and receiver.
+        sendTxnSuccessMails(sender, receiver, txnCreated);
+        successResponse(res, 200, 
+            `Transferred ${transferAmount} to ${receiver.email}`, 
+            txnCreated
         );
 
-        res.status(200).json({
-            status: "success",
-            message: `Transferred ${transferAmount} to ${receiver.email}`,
-        });
     } catch(error) {
         // Revert transaction changes if an error occured.
-        if (sender.balance !== senderInitialBalance)
-            sender.balance = senderInitialBalance;
-
-        if (receiver.balance !== receiverInitialBalance)
-            receiver.balance = receiverInitialBalance;
-        
-        if (Transaction.findOne({_id: txnCreated._id})) {
-            await Transaction.findByIdAndDelete(txnCreated._id);
-        }
-
-        if (sender.transactions.sent.length > txnsSent)
-            await sender.transactions.sent.pop();
-        
-        if (receiver.transactions.received.length > txnsReceived)
-            await receiver.transactions.received.pop();
-        
-        // Update database.
-        sender.save();
-        receiver.save();
-        
+        await revertTransaction(sender, receiver, txnCreated);
+        sendTxnFailureMail(sender, receiver, transferAmount);
         next(error);
     }
 };
